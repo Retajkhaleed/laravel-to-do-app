@@ -36,7 +36,6 @@
       margin-bottom:16px;
     }
     .brand h1{margin:0;font-size:26px}
-    .brand small{color:var(--muted)}
     .card{
       background:var(--card);
       border:1px solid var(--line);
