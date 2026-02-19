@@ -31,16 +31,6 @@
 <label>Description</label>
 <textarea class="input" name="description" style="margin-bottom:10px"></textarea>
 
-@if($project && $members->count())
-    <label>Assign To</label>
-    <select class="input" name="assigned_to" style="margin-bottom:10px">
-        <option value="">-- Unassigned --</option>
-        @foreach($members as $member)
-            <option value="{{ $member->id }}">{{ $member->username }}</option>
-        @endforeach
-    </select>
-@endif
-
 <button class="btn">Add Task</button>
 </form>
 </div>

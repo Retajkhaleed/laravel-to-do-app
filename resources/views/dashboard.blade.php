@@ -15,6 +15,9 @@
             <div class="task">
                 <div style="flex:1">
                     <p class="title" style="margin:0">{{ $project->name }}</p>
+                    @if($project->description)
+                        <small class="muted" style="display:block">{{ $project->description }}</small>
+                    @endif
                     <small class="muted">{{ $project->tasks->count() }} tasks</small>
                 </div>
                 <form method="POST" action="{{ route('projects.toggle', $project) }}">
@@ -30,6 +33,9 @@
                     <div class="dot {{ $task->status == 'done' ? 'done' : '' }}"></div>
                     <div style="flex:1">
                         <p class="title {{ $task->status == 'done' ? 'done' : '' }}" style="margin:0;font-size:14px">{{ $task->title }}</p>
+                        @if($task->description)
+                            <small class="muted" style="display:block">{{ $task->description }}</small>
+                        @endif
                         <small class="muted">{{ $task->assignee?->username ?? 'Unassigned' }}</small>
                     </div>
                     <form method="POST" action="{{ route('tasks.toggle', $task) }}">
@@ -37,16 +43,16 @@
                         <button class="btn" type="submit" style="font-size:11px">{{ $task->status == 'todo' ? 'Todo' : ($task->status == 'in_progress' ? 'In Progress' : 'Done') }}</button>
                     </form>
                     @can('addMember', $project)
-                        <button class="btn" style="font-size:11px" onclick="this.closest('.task').nextElementSibling.classList.toggle('hidden')">+ Member</button>
+                        <button class="btn" style="font-size:11px" onclick="this.closest('.task').nextElementSibling.classList.toggle('hidden')">+ Assign</button>
                     @endcan
                     <a class="btn" href="{{ route('tasks.edit', $task) }}" style="font-size:11px">Edit</a>
                 </div>
                 <div class="hidden" style="padding:8px 16px 8px 44px;border-top:1px solid var(--line)">
-                    <form method="POST" action="{{ route('projects.members.add', $project) }}">
-                        @csrf
+                    <form method="POST" action="{{ route('tasks.assign', $task) }}">
+                        @csrf @method('PATCH')
                         <div class="row">
                             <input class="input" name="username" placeholder="Username" required style="max-width:200px">
-                            <button class="btn" type="submit">Add</button>
+                            <button class="btn" type="submit">Assign</button>
                         </div>
                     </form>
                 </div>
@@ -64,7 +70,6 @@
     <div class="p" style="border-bottom:1px solid var(--line)">
         <h3 style="margin:0">Shared With Me</h3>
     </div>
-
     @forelse($sharedProjects as $project)
         <div style="border-bottom:1px solid var(--line)">
             <div class="task">
@@ -75,9 +80,12 @@
             </div>
             @forelse($project->tasks->where('assigned_to', auth()->id()) as $task)
                 <div class="task" style="padding-left:28px">
-                <div class="dot {{ $task->status == 'done' ? 'done' : '' }}"></div>
+                    <div class="dot {{ $task->status == 'done' ? 'done' : '' }}"></div>
                     <div style="flex:1">
                         <p class="title {{ $task->status == 'done' ? 'done' : '' }}" style="margin:0;font-size:14px">{{ $task->title }}</p>
+                        @if($task->description)
+                            <small class="muted" style="display:block">{{ $task->description }}</small>
+                        @endif
                         <small class="muted">{{ $task->status }}</small>
                     </div>
                     <form method="POST" action="{{ route('tasks.toggle', $task) }}">
@@ -106,6 +114,9 @@
             <div class="dot {{ $task->status == 'done' ? 'done' : '' }}"></div>
             <div style="flex:1">
                 <p class="title {{ $task->status == 'done' ? 'done' : '' }}" style="margin:0">{{ $task->title }}</p>
+                @if($task->description)
+                    <small class="muted" style="display:block">{{ $task->description }}</small>
+                @endif
                 <small class="muted">{{ $task->project?->name ?? 'Personal Task' }}</small>
             </div>
             <form method="POST" action="{{ route('tasks.toggle', $task) }}">

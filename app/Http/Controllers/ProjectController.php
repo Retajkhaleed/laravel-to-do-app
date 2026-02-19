@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\User;
-use App\Notifications\ProjectInvitedNotification;
+use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
@@ -103,28 +104,6 @@ class ProjectController extends Controller
         return back();
     }
 
-    public function addMember(Request $request, Project $project)
-    {
-        $this->authorize('addMember', $project);
-
-        $data = $request->validate([
-            'username' => 'required|string'
-        ]);
-
-        $user = User::where('username', $data['username'])->first();
-
-        if (!$user)
-            return back()->with('error', 'User not found');
-
-        if ($user->id == $project->owner_id)
-            return back()->with('error', 'Owner already leader');
-
-        $project->members()->syncWithoutDetaching([$user->id]);
-
-        $user->notify(new ProjectInvitedNotification($project, auth()->user()));
-
-        return back()->with('success', 'Member added');
-    }
 
     public function myProjects()
     {

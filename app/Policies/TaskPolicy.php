@@ -40,6 +40,7 @@ class TaskPolicy
     if ($user->isSuperAdmin()) return true;
     if ($task->assigned_to == $user->id) return true;
     if ($task->project && $task->project->owner_id == $user->id) return true;
+    if ($task->project && $task->project->members->contains($user->id)) return true;
     return false;
 }
 

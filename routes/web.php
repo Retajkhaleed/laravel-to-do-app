@@ -64,12 +64,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Projects
     Route::get('projects/mine', [ProjectController::class, 'myProjects'])->name('projects.mine');
     Route::get('projects/shared', [ProjectController::class, 'sharedProjects'])->name('projects.shared');
-    Route::post('projects/{project}/members', [ProjectController::class, 'addMember'])->name('projects.members.add');
     Route::patch('projects/{project}/toggle', [ProjectController::class, 'toggleStatus'])->name('projects.toggle'); 
     Route::resource('projects', ProjectController::class);
 
     // Tasks
-    Route::get('tasks/mine', [TaskController::class, 'myTasks'])->name('tasks.mine');
-    Route::patch('tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
-    Route::resource('tasks', TaskController::class);
+Route::get('tasks/mine', [TaskController::class, 'myTasks'])->name('tasks.mine');
+Route::patch('tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
+Route::patch('tasks/{task}/assign', [TaskController::class, 'assign'])->name('tasks.assign');
+Route::resource('tasks', TaskController::class);
 });

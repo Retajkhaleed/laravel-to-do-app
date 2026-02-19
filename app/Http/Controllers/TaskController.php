@@ -5,6 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Project;
 use App\Http\Requests\TaskRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use App\Notifications\TaskAssignedNotification;
+use Illuminate\Http\Request;
+
+
 
 class TaskController extends Controller
 {
@@ -41,24 +47,29 @@ class TaskController extends Controller
 }
 
     public function store(TaskRequest $request)
-    {
-        $validated = $request->validated();
+{
+    $validated = $request->validated();
 
-        if (!empty($validated['project_id'])) {
-            $project = Project::findOrFail($validated['project_id']);
-            $this->authorize('update', $project);
-        }
-
-        if (empty($validated['project_id'])) {
-            $validated['assigned_to'] = auth()->id();
-        }
-
-        $validated['status'] = $validated['status'] ?? 'todo';
-
-        Task::create($validated);
-
-        return redirect()->route('dashboard')->with('success', 'Task added');
+    if (!empty($validated['project_id'])) {
+        $project = Project::findOrFail($validated['project_id']);
+        $this->authorize('update', $project);
     }
+
+    if (empty($validated['assigned_to'])) {
+        $validated['assigned_to'] = auth()->id();
+    }
+
+    $validated['status'] = $validated['status'] ?? 'todo';
+
+    $task = Task::create($validated);
+
+    if (!empty($validated['assigned_to']) && $validated['assigned_to'] !== auth()->id()) {
+        $assignee = \App\Models\User::find($validated['assigned_to']);
+        $assignee?->notify(new \App\Notifications\TaskAssignedNotification($task));
+    }
+
+    return redirect()->route('dashboard')->with('success', 'Task added');
+}
 
     public function edit(Task $task)
     {
@@ -111,4 +122,39 @@ class TaskController extends Controller
 
     return back();
 }
+
+public function assign(Request $request, Task $task)
+{
+    $this->authorize('update', $task);
+
+    $validated = $request->validate([
+        'username' => 'required|string'
+    ]);
+
+    $user = \App\Models\User::where('username', $validated['username'])->first();
+
+    if (!$user)
+        return back()->with('error', 'User not found');
+
+    
+    if ($task->project) {
+        $task->project->members()->syncWithoutDetaching([$user->id]);
+    }
+
+    $task->update(['assigned_to' => $user->id]);
+
+    $user->notify(new TaskAssignedNotification($task));
+
+    return back()->with('success', 'Task assigned');
 }
+
+    public function myTasks()
+    {
+        $tasks = Task::where('assigned_to', auth()->id())
+            ->with(['project'])
+            ->latest()
+            ->get();
+
+        return view('tasks.index', compact('tasks'));
+    }
+}   
