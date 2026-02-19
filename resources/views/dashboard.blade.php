@@ -26,6 +26,10 @@
                 </form>
                 <a class="btn" href="{{ route('tasks.create', ['project' => $project->id]) }}" style="font-size:11px">+ Task</a>
                 <a class="btn" href="{{ route('projects.edit', $project) }}" style="font-size:11px">Edit</a>
+                <form method="POST" action="{{ route('projects.destroy', $project) }}">
+                    @csrf @method('DELETE')
+                    <button class="btn" type="submit" style="font-size:11px;color:red" onclick="return confirm('Are you sure you want to delete this project?')">Delete</button>
+                </form>
             </div>
 
             @forelse($project->tasks as $task)
@@ -46,6 +50,10 @@
                         <button class="btn" style="font-size:11px" onclick="this.closest('.task').nextElementSibling.classList.toggle('hidden')">+ Assign</button>
                     @endcan
                     <a class="btn" href="{{ route('tasks.edit', $task) }}" style="font-size:11px">Edit</a>
+                    <form method="POST" action="{{ route('tasks.destroy', $task) }}">
+                        @csrf @method('DELETE')
+                        <button class="btn" type="submit" style="font-size:11px;color:red" onclick="return confirm('Are you sure you want to delete this task?')">Delete</button>
+                    </form>
                 </div>
                 <div class="hidden" style="padding:8px 16px 8px 44px;border-top:1px solid var(--line)">
                     <form method="POST" action="{{ route('tasks.assign', $task) }}">
@@ -53,7 +61,7 @@
                         <div class="row">
                             <input class="input" name="username" placeholder="Username" required style="max-width:200px">
                             <button class="btn" type="submit">Assign</button>
-                        </div>
+                            </div>
                     </form>
                 </div>
             @empty
@@ -124,6 +132,10 @@
                 <button class="btn" type="submit" style="font-size:11px">{{ $task->status == 'todo' ? 'Todo' : ($task->status == 'in_progress' ? 'In Progress' : 'Done') }}</button>
             </form>
             <a class="btn" href="{{ route('tasks.edit', $task) }}" style="font-size:11px">Edit</a>
+            <form method="POST" action="{{ route('tasks.destroy', $task) }}">
+                @csrf @method('DELETE')
+                <button class="btn" type="submit" style="font-size:11px;color:red" onclick="return confirm('Are you sure you want to delete this task?')">Delete</button>
+            </form>
         </div>
     @empty
         <div class="p muted">No tasks yet.</div>
